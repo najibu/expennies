@@ -40,9 +40,7 @@ class AuthController
         $v->rule(fn($field, $value, $params, $fields) => ! $this->entityManager->getRepository(User::class)->count(['email' => $value]), 'email')
             ->message('User with this email already exists');
 
-        if ($v->validate()) {
-            echo 'Yay! We are good to go!';
-        } else {
+        if (! $v->validate()) {
             throw new ValidationException($v->errors());
         }
 
