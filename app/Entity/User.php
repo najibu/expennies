@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Contracts\UserInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 
 #[ORM\Entity, ORM\Table(name: "users")]
 #[ORM\HasLifecycleCallbacks]
-class User
+class User implements UserInterface
 {
     #[ORM\Id, ORM\Column(options: ["unsigned" => true]), ORM\GeneratedValue]
     private int $id;
