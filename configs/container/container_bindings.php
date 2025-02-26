@@ -3,28 +3,32 @@
 declare(strict_types = 1);
 
 use App\Auth;
-use App\Config;
-use App\Contracts\AuthInterface;
-use App\Contracts\UserProviderServiceInterface;
-use App\Enum\AppEnvironment;
-use App\Services\UserProviderService;
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\ORMSetup;
-use Psr\Container\ContainerInterface;
-use Psr\Http\Message\ResponseFactoryInterface;
 use Slim\App;
-use Slim\Factory\AppFactory;
+use App\Config;
+use App\Session;
 use Slim\Views\Twig;
-use Symfony\Bridge\Twig\Extension\AssetExtension;
-use Symfony\Component\Asset\Package;
-use Symfony\Component\Asset\Packages;
-use Symfony\Component\Asset\VersionStrategy\JsonManifestVersionStrategy;
-use Symfony\WebpackEncoreBundle\Asset\EntrypointLookup;
-use Symfony\WebpackEncoreBundle\Asset\TagRenderer;
-use Symfony\WebpackEncoreBundle\Twig\EntryFilesTwigExtension;
-use Twig\Extra\Intl\IntlExtension;
-
+use App\Enum\SameSite;
 use function DI\create;
+use Doctrine\ORM\ORMSetup;
+use App\Enum\AppEnvironment;
+use Slim\Factory\AppFactory;
+use Doctrine\ORM\EntityManager;
+use App\Contracts\AuthInterface;
+use App\DataObjects\SessionConfig;
+use Twig\Extra\Intl\IntlExtension;
+use App\Contracts\SessionInterface;
+use Symfony\Component\Asset\Package;
+use App\Services\UserProviderService;
+use Psr\Container\ContainerInterface;
+use Symfony\Component\Asset\Packages;
+use Psr\Http\Message\ResponseFactoryInterface;
+use App\Contracts\UserProviderServiceInterface;
+use Symfony\Bridge\Twig\Extension\AssetExtension;
+
+use Symfony\WebpackEncoreBundle\Asset\TagRenderer;
+use Symfony\WebpackEncoreBundle\Asset\EntrypointLookup;
+use Symfony\WebpackEncoreBundle\Twig\EntryFilesTwigExtension;
+use Symfony\Component\Asset\VersionStrategy\JsonManifestVersionStrategy;
 
 return [
     App::class                          => function (ContainerInterface $container) {
@@ -75,5 +79,13 @@ return [
     AuthInterface::class                => fn(ContainerInterface $container) => $container->get(Auth::class),
     UserProviderServiceInterface::class => fn(ContainerInterface $container) => $container->get(
         UserProviderService::class
+    ),
+    SessionInterface::class => fn(Config $config) => new Session(
+        new SessionConfig(
+            $config->get('session.name', ''),
+            $config->get('session.secure', true),
+            $config->get('session.http_only', true),
+            SameSite::from($config->get('session.same_site', 'lax'))
+        )
     ),
 ];
